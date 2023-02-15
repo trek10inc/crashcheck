@@ -1,6 +1,6 @@
 # Crashcheck Docker Container
 
-This Docker container is meant to be run as Kubernetes job that will check the number of restarts encountered. Once activated, the image will perform basic GET requests to a URL and exit with a return code of zero if a series of successful responses are received.
+This Docker container is meant to be run as Kubernetes job that will check the number of restarts encountered for a given deployment. Once activated, the image will perform access the local cluster's API using kubectl and will exit with a non-zero return code if a threshold is hit.
 
 This container is configured via the use of the following environment variables.
 - **INTERVAL**: How frequently (in seconds) do we run a check
@@ -56,4 +56,31 @@ The following Kubernetes resources can be utilized to create and bind a role to 
       name: read-pod-status-sa
       namespace: default
 
-You can assign a service account to a pod once these resources have been provisioned using the “spec.serviceAccountName” field.
+You can assign a service account to a pod once these resources have been provisioned using the “spec.serviceAccountName” field. An example of a job that utlizes this service account looks like the following.
+
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: rollout-crashcheck-job
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          name: rollout-crashcheck-job
+        spec:
+          restartPolicy: Never
+          serviceAccountName: read-pod-status-sa
+          containers:
+          - name: crashcheck
+            image: public.ecr.aws/i4a3l2a7/crashcheck:latest
+            env:
+            - name: HASH
+              value: '5bb677d599'
+            - name: INTERVAL
+              value: '5'
+            - name: DURATION
+              value: '300'
+            - name: CRASH_LIMIT
+              value: '5'
+            - name: DEBUG
+              value: '1'
