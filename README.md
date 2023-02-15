@@ -56,7 +56,7 @@ The following Kubernetes resources can be utilized to create and bind a role to 
       name: read-pod-status-sa
       namespace: default
 
-You can assign a service account to a pod once these resources have been provisioned using the “spec.serviceAccountName” field. An example of a job that utlizes this service account looks like the following.
+You can assign a service account to a pod once these resources have been provisioned using the “spec.serviceAccountName” field. An example of a job that utlizes this container and the previously mentioned service account looks like the following.
 
     apiVersion: batch/v1
     kind: Job
